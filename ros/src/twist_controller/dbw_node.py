@@ -61,22 +61,34 @@ class DBWNode(object):
                                      steer_ratio=steer_ratio,
                                      min_speed=0,
                                      max_lat_accel=max_lat_accel,
-                                     max_steer_angle=max_steer_angle)
+                                     max_steer_angle=max_steer_angle,
+                                     vehicle_mass=vehicle_mass,
+                                     fuel_capacity=fuel_capacity,
+                                     wheel_radius=wheel_radius)
 
         rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cb)
         rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)
         rospy.Subscriber('/current_velocity', TwistStamped, self.velocity_cb)
+
+        # Capture current time
+        self.last_time = rospy.get_time() # Get time in float seconds
 
         self.loop()
 
     def loop(self):
         rate = rospy.Rate(50) # 50Hz
         while not rospy.is_shutdown():
+            # Calculate the loop duration
+            current_time = rospy.get_time()
+            duration = current_time - self.last_time
+            self.last_time = current_time
+            # get the controls
             throttle, brake, steering = self.controller.control(
                         proposed_linear_velocity=self.twist.linear.x,
                         proposed_angular_velocity=self.twist.angular.z,
                         current_linear_velocity=self.current_velocity,
-                        dbw_enabled=self.dbw_enabled)
+                        dbw_enabled=self.dbw_enabled,
+                        duration=duration)
 
             if self.dbw_enabled:
                 self.publish(throttle, brake, steering)
