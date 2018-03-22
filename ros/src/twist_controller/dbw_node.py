@@ -34,7 +34,7 @@ that we have created in the `__init__` function.
 class DBWNode(object):
     def __init__(self):
         rospy.init_node('dbw_node')
-
+        print("dbw_node initialized")
         vehicle_mass = rospy.get_param('~vehicle_mass', 1736.35)
         fuel_capacity = rospy.get_param('~fuel_capacity', 13.5)
         brake_deadband = rospy.get_param('~brake_deadband', .1)
@@ -64,7 +64,9 @@ class DBWNode(object):
                                      max_steer_angle=max_steer_angle,
                                      vehicle_mass=vehicle_mass,
                                      fuel_capacity=fuel_capacity,
-                                     wheel_radius=wheel_radius)
+                                     wheel_radius=wheel_radius,
+                                     accel_limit=accel_limit,
+                                     decel_limit=decel_limit)
 
         rospy.Subscriber('/twist_cmd', TwistStamped, self.twist_cb)
         rospy.Subscriber('/vehicle/dbw_enabled', Bool, self.dbw_enabled_cb)

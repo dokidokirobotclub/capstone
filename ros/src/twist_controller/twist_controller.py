@@ -15,6 +15,7 @@ class Controller(object):
         self.vehicle_mass = kwargs['vehicle_mass']
         self.fuel_capacity = kwargs['fuel_capacity']
         self.wheel_radius = kwargs['wheel_radius']
+        self.decel_limit = kwargs['decel_limit']
         # Initialize the controller
         self.yaw_controller = YawController(
                                 wheel_base=kwargs['wheel_base'],
@@ -23,15 +24,15 @@ class Controller(object):
                                 max_lat_accel=kwargs['max_lat_accel'],
                                 max_steer_angle=kwargs['max_steer_angle'])
         # PIDs:
-        self.accel_pid = PID(kp=0.5, ki=0.5, kd=0.1,
-                mx=kwargs['max_lat_accel'], mn=0.0)
+        self.accel_pid = PID(kp=0.04, ki=0.0, kd=0.05,
+                mx=kwargs['accel_limit'], mn=kwargs['decel_limit'])
         self.steer_pid = PID(kp=0.5, ki=0.5, kd=0.1,
                 mx=kwargs['max_steer_angle'],
                 mn=-1.0*kwargs['max_steer_angle'])
         # Filters:
-        self.accel_filt = LowPassFilter(tau=2.0, ts=1)
-        self.steer_filt = LowPassFilter(tau=2.0, ts=1)
-        self.brake_filt = LowPassFilter(tau=2.0, ts=1)
+        self.accel_filt = LowPassFilter(tau=10, ts=1)
+        self.steer_filt = LowPassFilter(tau=5, ts=1)
+        self.brake_filt = LowPassFilter(tau=1.5, ts=1)
 
 
     def control(self, *args, **kwargs):
@@ -49,13 +50,17 @@ class Controller(object):
             steer = self.steer_filt.filt(steer_control)
             # Get throttle output
             vel_error = target_velocity - current_velocity
-            accel_control = self.throttle_pid.step(vel_error, duration)
+            print(vel_error, duration)
+            accel_control = self.accel_pid.step(vel_error, duration)
             accel = self.accel_filt.filt(accel_control)
+            print(accel_control, accel)
             # Get the brake output
             if accel < 0: # Trigger for deceleration only
                 brake_control = self.brake_value(accel)
                 brake = self.brake_filt.filt(brake_control)
                 accel = 0.
+            else:
+                brake = 0.
         else:
             self.accel_pid.reset()
             self.steer_pid.reset()
@@ -71,5 +76,5 @@ class Controller(object):
         @param accel: acceleration input
         '''
         total_mass = self.vehicle_mass + self.fuel_capacity * GAS_DENSITY
-        torque = -1.0 * accel * total_mass * self.wheel_radius
+        torque = -1.0 * 0.05 * accel * total_mass * self.wheel_radius
         return torque
