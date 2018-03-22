@@ -50,10 +50,8 @@ class Controller(object):
             steer = self.steer_filt.filt(steer_control)
             # Get throttle output
             vel_error = target_velocity - current_velocity
-            print(vel_error, duration)
             accel_control = self.accel_pid.step(vel_error, duration)
             accel = self.accel_filt.filt(accel_control)
-            print(accel_control, accel)
             # Get the brake output
             if accel < 0: # Trigger for deceleration only
                 brake_control = self.brake_value(accel)
