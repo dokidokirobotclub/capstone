@@ -49,6 +49,8 @@ class TLDetector(object):
         self.last_wp = -1
         self.state_count = 0
 
+	print("TL dtector")
+
         rospy.spin()
 
     def pose_cb(self, msg):
@@ -113,6 +115,7 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
+	print("get light state")
         if(not self.has_image):
             self.prev_light_loc = None
             return False
@@ -140,9 +143,9 @@ class TLDetector(object):
 
         #TODO find the closest visible traffic light (if one exists)
 
-        if light:
-            state = self.get_light_state(light)
-            return light_wp, state
+        if light or True:
+            state = self.get_light_state('foo')
+            return -1, state
         self.waypoints = None
         return -1, TrafficLight.UNKNOWN
 
