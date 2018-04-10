@@ -10,8 +10,8 @@ class TLClassifier(object):
     def __init__(self):
         print("TF Detector init")
         CWD = os.path.dirname(os.path.realpath(__file__))
-        PATH_TO_CKPT = CWD + '/../../../data/exported_graphs/frozen_inference_graph.pb'
-        PATH_TO_LABELS = '/../../../data/label_map.pbtxt'
+        PATH_TO_CKPT = CWD + '/../../../../data/exported_graphs/frozen_inference_graph.pb'
+        PATH_TO_LABELS = '/../../../../data/label_map.pbtxt'
         # Size, in inches, of the output images.
         IMAGE_SIZE = (12, 8)
         NUM_CLASSES = 3
