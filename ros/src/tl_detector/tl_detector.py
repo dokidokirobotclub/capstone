@@ -170,8 +170,6 @@ class TLDetector(object):
             int: ID of traffic light color (specified in styx_msgs/TrafficLight)
 
         """
-        print("get light state")
-        print(light.state)
         if(not self.has_image):
             self.prev_light_loc = None
             return False
@@ -182,6 +180,9 @@ class TLDetector(object):
         if light.state != TrafficLight.UNKNOWN:
             return light.state
         else:
+            # Reduce size of the input image when classifying since we don't need to process full resolution and otherwise
+            # are just wasting CPU/GPU time.
+            cv_image = cv2.resize(cv_image, (0,0), fx=0.75, fy=0.75)
             return self.light_classifier.get_classification(cv_image)
 
     def process_traffic_lights(self):
